@@ -25,6 +25,42 @@ export async function connectToMongoDB() {
   }
 }
 
+const connectedClient = await connectToMongoDB();
+const db = connectedClient.db("fixmate");
+const users = db.collection("user");
+const services = db.collection("services");
+
+app.get("/users", async (req, res) => {
+  try {
+    const allUsers = await users.find().toArray();
+    res.send(allUsers);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "An error occurred while fetching users." });
+  }
+});
+
+app.get("/services", async (req, res) => {
+  try {
+    const allServices = await services.find().toArray();
+    res.send(allServices);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "An error occurred while fetching services." });
+  }
+});
+
+app.post("/services", async (req, res) => {
+  try {
+    const newService = req.body;
+    const result = await services.insertOne(newService);
+    res.status(201).send(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "An error occurred while creating a service." });
+  }
+});
+
 app.get("/", (req, res) => {
   res.send({message: "FixMate server is running!"});
 });
