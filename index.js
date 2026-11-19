@@ -36,6 +36,7 @@ async function getCollections() {
     users: db.collection("user"),
     services: db.collection("services"),
     bookings: db.collection("bookings"),
+    transactions: db.collection("transactions"),
   };
 }
 
@@ -125,6 +126,39 @@ app.post("/bookings", async (req, res) => {
 
     res.status(500).send({
       error: "An error occurred while creating a booking.",
+    });
+  }
+});
+
+// Get all transactions
+app.get("/transactions", async (req, res) => {
+  try {
+    const { transactions } = await getCollections();
+
+    const allTransactions = await transactions.find().toArray();
+    res.status(200).send(allTransactions);
+  } catch (err) {
+    console.error("Get transactions error:", err);
+    res.status(500).send({
+      error: "An error occurred while fetching transactions.",
+    });
+  }
+});
+
+// Create a new transaction
+app.post("/transactions", async (req, res) => {
+  try {
+    const { transactions } = await getCollections();
+    const newTransaction = req.body;
+
+    const result = await transactions.insertOne(newTransaction);
+
+    res.status(201).send(result);
+  } catch (err) {
+    console.error("Create transaction error:", err);
+
+    res.status(500).send({
+      error: "An error occurred while creating a transaction.",
     });
   }
 });
