@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 
 const app = express();
 
@@ -159,6 +159,75 @@ app.post("/transactions", async (req, res) => {
 
     res.status(500).send({
       error: "An error occurred while creating a transaction.",
+    });
+  }
+});
+
+// Update a user (role, name, phone, service area, bio or photo)
+app.patch("/users/:id", async (req, res) => {
+  try {
+    const { users } = await getCollections();
+
+    const updates = { ...req.body, updatedAt: new Date() };
+    delete updates._id;
+
+    const result = await users.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updates }
+    );
+
+    res.status(200).send(result);
+  } catch (err) {
+    console.error("Update user error:", err);
+
+    res.status(500).send({
+      error: "An error occurred while updating the user.",
+    });
+  }
+});
+
+// Update a service (for example, approve or reject it)
+app.patch("/services/:id", async (req, res) => {
+  try {
+    const { services } = await getCollections();
+
+    const updates = { ...req.body };
+    delete updates._id;
+
+    const result = await services.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updates }
+    );
+
+    res.status(200).send(result);
+  } catch (err) {
+    console.error("Update service error:", err);
+
+    res.status(500).send({
+      error: "An error occurred while updating the service.",
+    });
+  }
+});
+
+// Update a booking (for example, mark the payment as paid)
+app.patch("/bookings/:id", async (req, res) => {
+  try {
+    const { bookings } = await getCollections();
+
+    const updates = { ...req.body, updatedAt: new Date() };
+    delete updates._id;
+
+    const result = await bookings.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updates }
+    );
+
+    res.status(200).send(result);
+  } catch (err) {
+    console.error("Update booking error:", err);
+
+    res.status(500).send({
+      error: "An error occurred while updating the booking.",
     });
   }
 });
