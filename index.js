@@ -404,7 +404,13 @@ app.get("/services", async (req, res) => {
 
     if (search) {
       const pattern = new RegExp(escapeRegex(search), "i");
-      filter.$or = [{ title: pattern }, { category: pattern }];
+      filter.$or = [
+        { title: pattern },
+        { category: pattern },
+        { description: pattern },
+        { serviceArea: pattern },
+        { technicianName: pattern },
+      ];
     }
 
     const sortOption =
