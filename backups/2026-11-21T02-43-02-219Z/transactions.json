@@ -1,0 +1,41 @@
+[
+  {
+    "_id": "6afee2fe88dd5ac5059dd053",
+    "bookingId": "6afee2fe88dd5ac5059dd052",
+    "customerId": "6afe9b471f650fc35db69a7a",
+    "customerName": "Mizi Vai",
+    "technicianName": "",
+    "amount": 700,
+    "status": "verified",
+    "method": "Card",
+    "reference": "STRIPE-WQGLK0IOT5AI",
+    "stripeSessionId": "cs_test_a0osVeZghgjPauRzpXEv2whSA6Y4wNQaG56F0xGpCn6hbtWQGlk0iot5ai",
+    "createdAt": "2026-11-19T11:52:30.166Z"
+  },
+  {
+    "_id": "6aff03964ced02f13e3fbcb2",
+    "bookingId": "6aff03964ced02f13e3fbcb1",
+    "customerId": "6afeb57e6ca68333adc9bc0a",
+    "customerName": "Md Shoayeb Mizi",
+    "technicianName": "",
+    "amount": 600,
+    "status": "verified",
+    "method": "Card",
+    "reference": "STRIPE-WYVMO96W6VJO",
+    "stripeSessionId": "cs_test_a0UIWozgD1DhtDunOBhmgAzheShSZXboguoHpIUEQWVoWnWyVMO96W6vJo",
+    "createdAt": "2026-11-19T14:11:34.111Z"
+  },
+  {
+    "_id": "6b001ef309779bff42064714",
+    "bookingId": "6b001ef209779bff42064713",
+    "customerId": "6afe9b471f650fc35db69a7a",
+    "customerName": "Mizi Vai",
+    "technicianName": "",
+    "amount": 800,
+    "status": "verified",
+    "method": "Card",
+    "reference": "STRIPE-SOFP2RBM4IH8",
+    "stripeSessionId": "cs_test_a0mUdrOkznv9RNgluk48xAprpioQKYqcwkiMHyHHqK13vEsOfP2Rbm4ih8",
+    "createdAt": "2026-11-20T10:20:34.884Z"
+  }
+]

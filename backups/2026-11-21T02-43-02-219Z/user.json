@@ -1,0 +1,55 @@
+[
+  {
+    "_id": "6afdedd9af3e450d547597b0",
+    "name": "Md Shoayeb Mizi",
+    "email": "mdshoayebmizi@gmail.com",
+    "emailVerified": false,
+    "image": "https://i.ibb.co/cS7bgN4k/fixmate-avatar-1795016279019.jpg",
+    "createdAt": "2026-11-18T18:26:33.081Z",
+    "updatedAt": "2026-11-19T09:54:44.353Z",
+    "role": "admin",
+    "bio": "Be a man, Among men",
+    "phone": "01641418856",
+    "serviceArea": "Dhaka, Bangladesh"
+  },
+  {
+    "_id": "6afe9b471f650fc35db69a7a",
+    "name": "Mizi Vai",
+    "email": "mizivai@gmail.com",
+    "emailVerified": false,
+    "image": "https://i.ibb.co/cS7bgN4k/fixmate-avatar-1795016279019.jpg",
+    "createdAt": "2026-11-19T06:46:31.419Z",
+    "updatedAt": "2026-11-19T06:46:31.419Z",
+    "role": "customer"
+  },
+  {
+    "_id": "6afeac491f650fc35db69a7d",
+    "name": "Shoayeb",
+    "email": "shoayeb@gmail.com",
+    "emailVerified": false,
+    "image": "https://i.ibb.co/TMzbTLCn/fixmate-avatar-1795019616063.jpg",
+    "createdAt": "2026-11-19T07:59:05.252Z",
+    "updatedAt": "2026-11-19T07:59:05.252Z",
+    "role": "technician"
+  },
+  {
+    "_id": "6afeb1fa1f650fc35db69a8a",
+    "name": "Challu Vai",
+    "email": "challu@gmail.com",
+    "emailVerified": false,
+    "image": "https://i.ibb.co/Fb6NZ69s/fixmate-avatar-1795076572947.jpg",
+    "createdAt": "2026-11-19T08:23:22.990Z",
+    "updatedAt": "2026-11-19T08:23:22.990Z",
+    "role": "technician"
+  },
+  {
+    "_id": "6afeb57e6ca68333adc9bc0a",
+    "name": "Md Shoayeb Mizi",
+    "email": "mrshoayeb75@gmail.com",
+    "emailVerified": true,
+    "image": "https://avatars.githubusercontent.com/u/169593207?v=4",
+    "createdAt": "2026-11-19T08:38:22.931Z",
+    "updatedAt": "2026-11-19T08:38:22.931Z",
+    "role": "customer"
+  }
+]
