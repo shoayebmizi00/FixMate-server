@@ -270,11 +270,15 @@ function serviceResponse(service) {
 }
 
 function bookingResponse(booking) {
+  const finalAmount = number(booking.finalAmount);
+  const baseAmount = number(booking.basePrice);
+
   return {
     ...booking,
     _id: String(booking._id),
     basePrice: number(booking.basePrice),
     finalAmount: number(booking.finalAmount),
+    amount: finalAmount > 0 ? finalAmount : baseAmount,
     statusHistory: Array.isArray(booking.statusHistory) ? booking.statusHistory : [],
   };
 }
