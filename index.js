@@ -315,6 +315,63 @@ app.get("/users", async (req, res) => {
   }
 });
 
+// Custom categories and service modes are stored on the admin account.
+// This keeps the project within the four application collections.
+app.get("/settings", async (req, res) => {
+  try {
+    const { users } = await getCollections();
+    const admin = await users.findOne({ role: "admin" });
+
+    res.status(200).send({
+      categories: Array.isArray(admin?.customCategories)
+        ? admin.customCategories
+        : [],
+      modes: Array.isArray(admin?.customServiceModes)
+        ? admin.customServiceModes
+        : [],
+    });
+  } catch (err) {
+    console.error("Settings error:", err);
+    res.status(500).send({ error: "Could not fetch settings." });
+  }
+});
+
+app.patch("/settings", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { users } = await getCollections();
+    const categories = Array.isArray(req.body.categories)
+      ? req.body.categories.map(text).filter(Boolean)
+      : null;
+    const modes = Array.isArray(req.body.modes)
+      ? req.body.modes.map(text).filter(Boolean)
+      : null;
+
+    if (!categories || !modes) {
+      res.status(400).send({ error: "Send category and mode lists." });
+      return;
+    }
+
+    await users.updateOne(
+      { _id: toObjectId(req.user.sub) },
+      {
+        $set: {
+          customCategories: [...new Set(categories)],
+          customServiceModes: [...new Set(modes)],
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    res.status(200).send({
+      categories: [...new Set(categories)],
+      modes: [...new Set(modes)],
+    });
+  } catch (err) {
+    console.error("Update settings error:", err);
+    res.status(500).send({ error: "Could not update settings." });
+  }
+});
+
 // Get one user.
 app.get("/users/:id", async (req, res) => {
   try {
@@ -359,6 +416,31 @@ app.patch("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
   } catch (err) {
     console.error("Update user error:", err);
     res.status(500).send({ error: "An error occurred while updating the user." });
+  }
+});
+
+// Delete a user. The Next.js route prevents an admin from deleting themselves.
+app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { users } = await getCollections();
+    const id = toObjectId(req.params.id);
+
+    if (!id) {
+      res.status(400).send({ error: "Invalid user id." });
+      return;
+    }
+
+    const deleted = await users.deleteOne({ _id: id });
+
+    if (deleted.deletedCount === 0) {
+      res.status(404).send({ error: "User not found." });
+      return;
+    }
+
+    res.status(200).send({ deleted: true });
+  } catch (err) {
+    console.error("Delete user error:", err);
+    res.status(500).send({ error: "An error occurred while deleting the user." });
   }
 });
 
@@ -466,7 +548,7 @@ app.get("/services/:id", async (req, res) => {
 // Create a new service. New listings always start pending and available.
 app.post("/services", verifyToken, verifyTechnician, async (req, res) => {
   try {
-    const { services } = await getCollections();
+    const { services, users } = await getCollections();
     const body = req.body;
 
     if (!text(body.title) || !text(body.description)) {
@@ -479,12 +561,26 @@ app.post("/services", verifyToken, verifyTechnician, async (req, res) => {
       return;
     }
 
-    if (!SERVICE_CATEGORIES.includes(body.category)) {
+    const admin = await users.findOne({ role: "admin" });
+    const customCategories = Array.isArray(admin?.customCategories)
+      ? admin.customCategories
+      : [];
+    const customModes = Array.isArray(admin?.customServiceModes)
+      ? admin.customServiceModes
+      : [];
+
+    if (
+      !SERVICE_CATEGORIES.includes(body.category) &&
+      !customCategories.includes(body.category)
+    ) {
       res.status(400).send({ error: "Choose a valid service category." });
       return;
     }
 
-    if (!SERVICE_MODES.includes(body.serviceMode)) {
+    if (
+      !SERVICE_MODES.includes(body.serviceMode) &&
+      !customModes.includes(body.serviceMode)
+    ) {
       res.status(400).send({ error: "Choose a valid service mode." });
       return;
     }
@@ -811,11 +907,17 @@ app.patch("/bookings/:id", verifyToken, async (req, res) => {
       const isPaymentUpdate =
         req.body.status === undefined &&
         text(req.body.paymentStatus) === "paid";
-      if (!owns && !isPaymentUpdate) {
+      const isEditUpdate =
+        req.body.status === undefined &&
+        (req.body.customerPhone !== undefined ||
+          req.body.address !== undefined ||
+          req.body.preferredDate !== undefined ||
+          req.body.problemDescription !== undefined);
+      if (!owns && !isPaymentUpdate && !isEditUpdate) {
         res.status(403).send({ error: "You can only update your own booking." });
         return;
       }
-      if (!isPaymentUpdate && text(req.body.status) !== "cancelled") {
+      if (!isPaymentUpdate && !isEditUpdate && text(req.body.status) !== "cancelled") {
         res.status(403).send({ error: "Customers may only cancel a booking." });
         return;
       }
@@ -836,6 +938,48 @@ app.patch("/bookings/:id", verifyToken, async (req, res) => {
     const currentStatus = normalizeStatus(booking.status);
     const nextStatus = body.status === undefined ? currentStatus : normalizeStatus(body.status);
     const updates = { updatedAt: new Date().toISOString() };
+
+    if (
+      body.status === undefined &&
+      (body.customerPhone !== undefined ||
+        body.address !== undefined ||
+        body.preferredDate !== undefined ||
+        body.problemDescription !== undefined)
+    ) {
+      if (currentStatus !== "requested") {
+        res.status(409).send({
+          error: "You can only edit a booking while it is still requested.",
+        });
+        return;
+      }
+
+      if (!text(body.customerPhone) || !text(body.address) || !text(body.preferredDate)) {
+        res.status(400).send({
+          error: "Phone, address and preferred date are required.",
+        });
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      if (text(body.preferredDate) < today) {
+        res.status(400).send({
+          error: "Choose today or a future date.",
+        });
+        return;
+      }
+
+      if (text(body.customerPhone)) updates.customerPhone = text(body.customerPhone);
+      if (text(body.address)) updates.address = text(body.address);
+      if (text(body.preferredDate)) updates.preferredDate = text(body.preferredDate);
+      if (text(body.problemDescription).length >= 20) {
+        updates.problemDescription = text(body.problemDescription);
+      } else {
+        res.status(400).send({
+          error: "Describe the problem in at least 20 characters.",
+        });
+        return;
+      }
+    }
 
     if (body.status !== undefined) {
       if (!BOOKING_STATUSES.includes(nextStatus)) {
